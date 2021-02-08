@@ -1,0 +1,30 @@
+import boto3
+client = boto3.client('route53')
+instances = client.list_hosted_zones_by_name(
+    #DNSName='string',
+
+    MaxItems='100'
+    )
+
+hosted_zone_id = []
+
+
+for pz in instances['HostedZones']:
+    private_zone =  pz['Config']['PrivateZone']
+    if not private_zone :
+        print("ID is : " + pz['Id'])
+        hosted_zone_id.append(pz['Id'])
+        print(hosted_zone_id)
+        z = ','.join(hosted_zone_id)
+        print(z)
+        print("Name : " + pz['Name'])
+        print("CallerReference : " + pz['CallerReference'])
+        print("ResourceRecordSetCount: " , pz['ResourceRecordSetCount'])
+        print("privatezone: " , pz['Config']['PrivateZone'])
+
+
+        records = client.list_resource_record_sets(
+        HostedZoneId= z
+        )
+
+        print("\n The hosted zones are: ".join([_['Name'] for _ in records['ResourceRecordSets']]))
