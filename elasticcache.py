@@ -1,36 +1,37 @@
+
+
 import boto3
 
-def elastic_cache():
-
-    client = boto3.client('elasticache')
-    response = client.describe_cache_clusters(
-    )
-    hosted_zone_id = []
-    print(" **********List of Redis cluster are*********")
-    for cache_clus in response['CacheClusters']:
-        print("Cache cluster id:  " + cache_clus['CacheClusterId'])
-        print("Engine version:  " + cache_clus['EngineVersion'])
-        print("Engine name:  " + cache_clus['Engine'])
-        print("Downloadlandingpage:  " + cache_clus['ClientDownloadLandingPage'])
-        print("No of cache nodes: " , cache_clus['NumCacheNodes'])
-        print("Preferred AZ: " + cache_clus['PreferredAvailabilityZone'])
-        print("subnet group name: " + cache_clus['CacheSubnetGroupName'])
-        response = client.describe_cache_subnet_groups(
-                CacheSubnetGroupName = cache_clus['CacheSubnetGroupName']
-                )
-        for cache_subnet in response['CacheSubnetGroups']:
-            print("Cache subnet group name:  " + cache_subnet['CacheSubnetGroupName'])
-            print( "VPC ID : " + cache_subnet['VpcId'])
-        for i in cache_subnet['Subnets']:
-            print( "Subnets identifier  : " + i['SubnetIdentifier'])
-            hosted_zone_id.append(i['SubnetIdentifier'])
+def dynamo_table():
+    client = boto3.client('dynamodb')
+    list_t = client.list_tables()
+    print("***************The list of tables in DynamoDb are****************")
+    for i in list_t['TableNames']:
+        print(i)
 
 
-        for j in cache_subnet['Subnets']:
-            print("Subnet availability zone : " + j['SubnetAvailabilityZone']['Name'])
-        print("/////////////////////////////////////////////////////////////////////////////")
+    list_dl = client.describe_limits()
+    print( "*************The Describe limit details**************")
+    print(list_dl)
+    print("///////////////////////////////////////////////////////////")
+
+
+def dax_list():
+    client1 = boto3.client('dax')
+    response = client1.describe_clusters()
+    print("***************DAX clusters details****************")
+    for cluster_name in response['Clusters']:
+        print("The cluster name: " + cluster_name['ClusterName'])
+        print("ClusterArn: " + cluster_name['ClusterArn'])
+        print("TotalNodes: " , cluster_name['TotalNodes'])
+        print("ActiveNodes: " , cluster_name['ActiveNodes'])
+        print("NodeType: " + cluster_name['NodeType'])
+        print("Cluster Endpoint Address: " + cluster_name["ClusterDiscoveryEndpoint"]["Address"])
+        print("Port : " , cluster_name["ClusterDiscoveryEndpoint"]["Port"])
+        print("///////////////////////////////////////////////////////////")
 
 
 
-def find_public_subnet():
-    ec2 = boto3.client('ec2')
+
+dynamo_table()
+dax_list()
