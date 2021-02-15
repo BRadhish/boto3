@@ -32,3 +32,37 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
+
+
+
+import boto3
+from datatool import tools
+
+client = boto3.client('rds')
+rds_pub = ["num", "Identifier", "Endpoint Address", "Class", "Engine", "Version", "MultiAZ","Status","PublicIP"]
+
+@tools.write_csv("RDS_public", rds_pub)
+
+def list_instances():
+   instances = client.describe_db_instances()
+   s_no = 1
+
+   for n in instances['DBInstances']:
+        PA_access =  n['PubliclyAccessible']
+        if PA_access:
+
+            DB_instance_identifier = n['DBInstanceIdentifier']
+            Endpoint_Address = n['Endpoint']['Address']
+            class_i = n['DBInstanceClass']
+            Engine = n['Engine']
+            Version = n['EngineVersion']
+            MultiAZ = n['MultiAZ']
+            Status = n['DBInstanceStatus']
+            PublicIP = n['PubliclyAccessible']
+            yield([s_no,DB_instance_identifier,Endpoint_Address,class_i,Engine,Version,MultiAZ,Status,PublicIP]) 
+            s_no = s_no + 1
+
+
+
+
+list_instances()
