@@ -1,0 +1,1222 @@
+Setting up Prometheus Alert manager with slack
+Created by RADHISH BABU
+Last updated Jan 29, 202114 min read3 people viewed3 people viewed
+DO-6584: Alert Manager rules for EC2 in slackDONE
+Step 1: ( Steps to create Slack API URL )
+
+To set up alerting in your Slack workspace, you need a Slack API URL.
+
+Go to Slack -> Administration -> Manage apps
+
+In the Manage apps directory, search for Incoming WebHooks and add it to your Slack workspace.
+
+Created below Slack API URL 
+
+
+https://hooks.slack.com/services/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
+Step 2 :
+
+Slack API url should be mentioned in below configuration file path
+
+/home/prometheus/alertmanager/alertmanager-0.21.0.linux-amd64/alertmanager.yml
+
+
+receivers:
+- name: 'slack-notifications'
+  slack_configs:
+  - api_url: https://hooks.slack.com/services/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
+    channel: '#alertchannel-testing'
+    send_resolved: true
+
+Step 3:
+Install Alertmanager on Load Environment in below folder 
+
+
+/home/prometheus/alertmanager/alertmanager-0.21.0.linux-amd64
+Alertmanager is running on port 9093 and url is http://172.31.23.60:9093/#/alerts
+
+Step:4
+
+Alertmanager configuration should be added in prometheus.yml file in below location 
+
+
+/home/prometheus/prometheus-2.22.0.linux-amd64
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+
+#Rules and alerts are read from the specified file(s)
+rule_files:
+  - alert.rules.yml
+
+#Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - '172.31.23.60:9093'
+
+scrape_configs:
+  - job_name: 'load-service-scheduler'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-scheduler-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-superteam-api-gateway'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-superteam-api-gateway-auth-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-api-gateway-auth'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-api-gateway-auth-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-superteam-cricket'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-superteam-cricket-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-killbill'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-killbill-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-accounts'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-accounts-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'elk-elasticsearch'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: ELK-Elasticsearch-logging-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'elk-logstash'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: ELK-Logstash-logging-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-tournament-gameplay'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-tournament-gameplay-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-profile'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-profile-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-data'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-data-[a-z]{4}$*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-audio-chat-rooms'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-audio-chat-rooms-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-tournament-1v1'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-tournament-1v1-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-global-leaderboard'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-global-leaderboards.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-offers'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-offers-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-tournament-wfr'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-tournament-wfr-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-tournament-internal'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-tournament-internal-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-banners'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_private_dns_name" ]
+        action: keep
+      - source_labels: [ "__meta_ec2_private_dns_name" ]
+        target_label: privateIp
+        action: replace
+      - source_labels: [ "__meta_ec2_private_ip" ]
+        action: keep
+      - source_labels: [ "__meta_ec2_private_ip" ]
+        target_label: ip
+        action: replace
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-banners-.*
+        #regex: staging__service__banners.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+      - source_labels: [ "__meta_ec2_private_dns_name" ]
+        target_label: 'Instance_dns'
+  - job_name: 'load-service-beneficiary'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-beneficiary-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-coupons'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-coupons-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-deals'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-deals-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-kyc'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-kyc-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-login-api-gateway-auth'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-login-api-gateway-auth-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-missions'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-missions-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-notifications'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-notifications-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-payments'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-payments-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-rankdrop'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-rankdrop-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-generated'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-generated-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-superteam-cricket-scheduler'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-st-cricket-scheduler-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: redis-enterprise
+    scrape_interval: 30s
+    scrape_timeout: 30s
+    metrics_path: /
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ["mplredis.mplstage.com:8070"]
+  - job_name: 'load-service-tournament-gameplay-api-gateway-jmx'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9102
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-tournament-gameplay-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-tournament-gameplay-auth-jmx'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9103
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-tournament-gameplay-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-tournament-gameplay-jmx'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9101
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-tournament-gameplay-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-accounts-jmx'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9101
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-accounts-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-superteam-cricket-jmx'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9101
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-superteam-cricket-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-private-api-gateway'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-private-api-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'testjob'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: ashish-g-loadtest-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'test-job-label'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: ['__meta_ec2_tag_Name']
+        regex: 'load-prograf-001'
+        action: keep
+      - source_labels: ['__meta_ec2_availability_zone']
+        target_label: 'Zone'
+      - source_labels: ['__meta_ec2_private_ip']
+        target_label: 'instance'
+      - source_labels: ['__meta_ec2_tag_Name']
+        target_label: 'Name'
+      - source_labels: ['__meta_ec2_instance_state']
+        target_label: 'Instance_Status'
+      - source_labels: ['__meta_ec2_instance_type']
+        target_label: 'Instance_Type'
+      - source_labels: ['__meta_ec2_tag_game']
+        target_label: 'Game'     
+      - source_labels: ['__meta_ec2_tag_cluster']
+        target_label: 'cluster'
+  - job_name: 'load-service-stories'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-stories-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-referral'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-referral-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-segmentation'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-segmentation-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-relations-v2'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-relations-v2-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-spinwheel'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-spinwheel-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-live-stream'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-live-stream-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-updater'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-updater-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-fraud'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-fraud-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-history'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-history-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-third-party'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-third-party-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-clevertap-relay'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-clevertap-relay-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-content-moderation'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-content-moderation-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-game-management'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-game-management-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-glbs-api-gateway-auth'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-glbs-api-gateway-auth-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-loyalty'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-loyalty-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-mqtt'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-mqtt-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-mqtt-emitter'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-mqtt-emitter-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-nostra'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-nostra-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-payments-api-gateway-auth'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-payments-api-gateway-auth-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-search'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-search-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-storage'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-storage-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-superteam-api-gateway-auth'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-superteam-api-gateway-auth-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-support-payment'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-support-payment-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-data-aggregator'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-data-aggregator-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-payments-singapore'
+    ec2_sd_configs:
+      - region: ap-southeast-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-payments*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-accounts-singapore'
+    ec2_sd_configs:
+      - region: ap-southeast-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-accounts*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-beneficiary-singapore'
+    ec2_sd_configs:
+      - region: ap-southeast-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-beneficiary*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-spinwheel-singapore'
+    ec2_sd_configs:
+      - region: ap-southeast-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-spinwheel*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-relation'
+    ec2_sd_configs:
+      - region: ap-southeast-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-relation*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+
+  - job_name: 'consul_monitor'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9107
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: dc-mumbai-Consul-Server
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-user-timeseries-data'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-user-timeseries-data-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+  - job_name: 'load-service-home-management'
+    ec2_sd_configs:
+      - region: ap-south-1
+        port: 9100
+    relabel_configs:
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        regex: load-service-home-management-.*
+        action: keep
+      - source_labels: [ "__meta_ec2_tag_Name" ]
+        target_label: instance
+        action: replace
+
+Created alert rules in prometheus
+
+Created a dedicated Prometheus folder  in below location 
+
+
+/home/prometheus/prometheus-2.22.0.linux-amd64/alert.rules.yml
+List of alerts configured in rule file:
+
+
+  - alert: InstanceDown
+  - alert: HostOutOfMemory
+  - alert: HostHighCpuLoad
+  - alert: HostOutOfDiskSpace
+  - alert: HostSystemdServiceCrashed
+  - alert: PrometheusJobMissing
+  - alert: PrometheusTargetMissing
+  - alert: PrometheusConfigurationReloadFailure
+  - alert: PrometheusTooManyRestarts
+  - alert: PrometheusAlertmanagerConfigNotSynced
+  - alert: PrometheusNotConnectedToAlertmanager
+  - alert: PrometheusNotificationsBacklog
+  - alert: PrometheusAlertmanagerNotificationFailing
+  - alert: HostUnusualNetworkThroughputIn
+  - alert: HostUnusualDiskReadRate
+  - alert: HostHighCpuLoad
+  - alert: HostSwapIsFillingUp
+  - alert: HostOomKillDetected
+  - alert: HostNetworkReceiveErrors
+  - alert: HostNetworkTransmitErrors
+  - alert: MysqlDown
+  - alert: MysqlHighThreadsRunning
+  - alert: PostgresqlDown
+  - alert: PostgresqlTooManyConnection
+
+Alert manager Rules file can be found here 
+
+
+Name : alert.rules.yml
+
+
+/home/prometheus/prometheus-2.22.0.linux-amd64
+
+groups:
+- name: alert_rules
+  rules:
+  - alert: InstanceDown
+   # Condition for alerting
+    expr: up == 0
+    for: 5m
+   # Annotation - additional informational labels to store more information
+    annotations:
+      title: 'Instance {{ $labels.instance }} down'
+      description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute.'
+   # Labels - additional labels to be attached to the alert
+    labels:
+        severity: 'critical'
+
+  - alert: HostOutOfMemory
+   # Condition for alerting
+    expr: node_memory_MemAvailable / node_memory_MemTotal * 100 < 25
+    for: 5m
+   # Annotation - additional informational labels to store more information
+    annotations:
+      title: 'Host out of memory (instance {{ $labels.instance }})'
+      description: 'Node memory is filling up (< 25% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+   # Labels - additional labels to be attached to the alert
+    labels:
+        severity: 'warning'
+
+  - alert: HostHighCpuLoad
+   # Condition for alerting
+    expr: (sum by (instance) (irate(node_cpu{job="node_exporter_metrics",mode="idle"}[5m]))) > 80
+    for: 5m
+   # Annotation - additional informational labels to store more information
+    annotations:
+      title: 'Host high CPU load (instance {{ $labels.instance }})'
+      description: 'CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+   # Labels - additional labels to be attached to the alert
+    labels:
+        severity: 'warning'
+
+  - alert: HostOutOfDiskSpace
+   # Condition for alerting
+    expr: (node_filesystem_avail{mountpoint="/"}  * 100) / node_filesystem_size{mountpoint="/"} < 50
+    for: 5m
+   # Annotation - additional informational labels to store more information
+    annotations:
+      title: 'Host out of disk space (instance {{ $labels.instance }})'
+      description: 'Disk is almost full (< 50% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+   # Labels - additional labels to be attached to the alert
+    labels:
+        severity: 'warning'
+
+  - alert: HostSystemdServiceCrashed
+    expr: node_systemd_unit_state{state="failed"} == 1
+    for: 5m
+    annotations:
+      tittle: 'Host SystemD service crashed (instance {{ $labels.instance }})'
+      description: 'SystemD service crashed\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+    labels:
+        severity: 'warning'
+
+
+  - alert: PrometheusJobMissing
+    expr: absent(up{job="prometheus"})
+    for: 0m
+    labels:
+      severity: 'warning'
+    annotations:
+      tittle: 'Prometheus job missing (instance {{ $labels.instance }})'
+      description: 'A Prometheus job has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+
+
+
+
+
+
+  - alert: PrometheusTargetMissing
+    expr: up == 0
+    for: 0m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: 'Prometheus target missing (instance {{ $labels.instance }})'
+      description: 'A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: PrometheusConfigurationReloadFailure
+    expr: prometheus_config_last_reload_successful != 1
+    for: 0m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Prometheus configuration reload failure (instance {{ $labels.instance }})'
+      description: 'Prometheus configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+  - alert: PrometheusTooManyRestarts
+    expr: changes(process_start_time_seconds{job=~"prometheus|pushgateway|alertmanager"}[15m]) > 2
+    for: 0m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Prometheus too many restarts (instance {{ $labels.instance }})'
+      description: 'Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: PrometheusAlertmanagerConfigNotSynced
+    expr: count(count_values("config_hash", alertmanager_config_hash)) > 1
+    for: 0m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Prometheus AlertManager config not synced (instance {{ $labels.instance }})'
+      description: 'Configurations of AlertManager cluster instances are out of sync\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: PrometheusNotConnectedToAlertmanager
+    expr: prometheus_notifications_alertmanagers_discovered < 1
+    for: 0m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: 'Prometheus not connected to alertmanager (instance {{ $labels.instance }})'
+      description: 'Prometheus cannot connect the alertmanager\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: PrometheusNotificationsBacklog
+    expr: min_over_time(prometheus_notifications_queue_length[10m]) > 0
+    for: 0m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Prometheus notifications backlog (instance {{ $labels.instance }})'
+      description: 'The Prometheus notification queue has not been empty for 10 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: PrometheusAlertmanagerNotificationFailing
+    expr: rate(alertmanager_notifications_failed_total[1m]) > 0
+    for: 0m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: 'Prometheus AlertManager notification failing (instance {{ $labels.instance }})'
+      description: 'Alertmanager is failing sending notifications\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+
+
+
+
+
+
+
+
+
+
+  - alert: HostUnusualNetworkThroughputIn
+    expr: sum by (instance) (rate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100
+    for: 5m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Host unusual network throughput in (instance {{ $labels.instance }})'
+      description: 'Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: HostUnusualDiskReadRate
+    expr: sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+    for: 5m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Host unusual disk read rate (instance {{ $labels.instance }})'
+      description: 'Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: HostHighCpuLoad
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+    for: 0m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Host high CPU load (instance {{ $labels.instance }})'
+      description: 'CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: HostSwapIsFillingUp
+    expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80
+    for: 2m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Host swap is filling up (instance {{ $labels.instance }})'
+      description: 'Swap is filling up (>80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+
+  - alert: HostOomKillDetected
+    expr: increase(node_vmstat_oom_kill[1m]) > 0
+    for: 0m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Host OOM kill detected (instance {{ $labels.instance }})'
+      description: 'OOM kill detected\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: HostNetworkReceiveErrors
+    expr: rate(node_network_receive_errs_total[2m]) / rate(node_network_receive_packets_total[2m]) > 0.01
+    for: 2m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Host Network Receive Errors (instance {{ $labels.instance }})'
+      description: '{{ $labels.instance }} interface {{ $labels.device }} has encountered {{ printf "%.0f" $value }} receive errors in the last five minutes.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+  - alert: HostNetworkTransmitErrors
+    expr: rate(node_network_transmit_errs_total[2m]) / rate(node_network_transmit_packets_total[2m]) > 0.01
+    for: 2m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Host Network Transmit Errors (instance {{ $labels.instance }})'
+      description: '{{ $labels.instance }} interface {{ $labels.device }} has encountered {{ printf "%.0f" $value }} transmit errors in the last five minutes.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+  - alert: MysqlDown
+    expr: mysql_up == 0
+    for: 0m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: 'MySQL down (instance {{ $labels.instance }})'
+      description: 'MySQL instance is down on {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+
+  - alert: MysqlHighThreadsRunning
+    expr: avg by (instance) (rate(mysql_global_status_threads_running[1m])) / avg by (instance) (mysql_global_variables_max_connections) * 100 > 60
+    for: 2m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'MySQL high threads running (instance {{ $labels.instance }})'
+      description: 'More than 60% of MySQL connections are in running state on {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: PostgresqlDown
+    expr: pg_up == 0
+    for: 0m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: 'Postgresql down (instance {{ $labels.instance }})'
+      description: 'Postgresql instance is down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+
+  - alert: PostgresqlTooManyConnections
+    expr: sum by (datname) (pg_stat_activity_count{datname!~"template.*|postgres"}) > pg_settings_max_connections * 0.8
+    for: 2m
+    labels:
+      severity: 'warning'
+    annotations:
+      summary: 'Postgresql too many connections (instance {{ $labels.instance }})'
+      description: 'PostgreSQL instance has too many connections (> 80%).\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}'
+
+Step 5 :
+
+Alert formatting code should be placed here
+
+
+
+/home/prometheus/alertmanager/alertmanager-0.21.0.linux-amd64
+File Name: alertmanager.yml
+
+
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 5m
+  receiver: 'slack-notifications'
+receivers:
+- name: 'slack-notifications'
+  slack_configs:
+  - api_url: https://hooks.slack.com/services/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
+    channel: '#alertchannel-testing'
+    send_resolved: true
+    
+
+    icon_url: https://avatars3.githubusercontent.com/u/3380462
+    title: |-
+      [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
+      {{- if gt (len .CommonLabels) (len .GroupLabels) -}}
+        {{" "}}(
+        {{- with .CommonLabels.Remove .GroupLabels.Names }}
+          {{- range $index, $label := .SortedPairs -}}
+            {{ if $index }}, {{ end }}
+            {{- $label.Name }}="{{ $label.Value -}}"
+          {{- end }}
+        {{- end -}}
+        )
+      {{- end }}
+    text: >-
+      {{ with index .Alerts 0 -}}
+        :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>*
+        {{- if .Annotations.runbook }}   :notebook: *<{{ .Annotations.runbook }}|Runbook>*{{ end }}
+      {{ end }}
+      *Alert details*:
+      {{ range .Alerts -}}
+        *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+      *Description:* {{ .Annotations.description }}
+      *Details:*
+        {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+        {{ end }}
+      {{ end }}
+
+
+ 
+
+Alerts will be fired to this slack channel
+
+Name: alertchannel-testing
